@@ -58,6 +58,11 @@ public enum RequestType
     Update,
 
     /**
+     * SugarCRM update method call, updates linked object as well (similar to LinkedRead)
+     */
+    LinkedUpdate,
+
+    /**
      * SugarCRM bulk update method call.
      */
     BulkUpdate,

@@ -24,13 +24,14 @@
 
 package com.sugaronrest;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sugaronrest.restapicalls.ModuleInfo;
 import com.sugaronrest.restapicalls.SugarRestClientExt;
 import com.sugaronrest.utils.JsonObjectMapper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpStatus;
 
 
 public class SugarRestClient {
@@ -163,6 +164,10 @@ public class SugarRestClient {
             case Update: {
                 return SugarRestClientExt.executeUpdate(request, moduleInfo);
             }
+
+        case LinkedUpdate: {
+            return SugarRestClientExt.executeUpdateLinked(request, moduleInfo);
+        }
 
             case BulkUpdate: {
                 return SugarRestClientExt.executeUpdates(request, moduleInfo);

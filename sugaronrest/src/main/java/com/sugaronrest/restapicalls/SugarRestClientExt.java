@@ -24,21 +24,44 @@
 
 package com.sugaronrest.restapicalls;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
+
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sugaronrest.ErrorResponse;
 import com.sugaronrest.Options;
 import com.sugaronrest.SugarRestRequest;
 import com.sugaronrest.SugarRestResponse;
-import com.sugaronrest.restapicalls.methodcalls.*;
+import com.sugaronrest.restapicalls.methodcalls.Authentication;
+import com.sugaronrest.restapicalls.methodcalls.DeleteEntry;
+import com.sugaronrest.restapicalls.methodcalls.GetAvailableModules;
+import com.sugaronrest.restapicalls.methodcalls.GetEntry;
+import com.sugaronrest.restapicalls.methodcalls.GetEntryList;
+import com.sugaronrest.restapicalls.methodcalls.GetLinkedEntry;
+import com.sugaronrest.restapicalls.methodcalls.GetLinkedEntryList;
+import com.sugaronrest.restapicalls.methodcalls.GetPagedEntryList;
+import com.sugaronrest.restapicalls.methodcalls.InsertEntries;
+import com.sugaronrest.restapicalls.methodcalls.InsertEntry;
+import com.sugaronrest.restapicalls.methodcalls.UpdateEntries;
+import com.sugaronrest.restapicalls.methodcalls.UpdateEntry;
+import com.sugaronrest.restapicalls.methodcalls.UpdateLinkedEntry;
 import com.sugaronrest.restapicalls.requests.LoginRequest;
-import com.sugaronrest.restapicalls.responses.*;
+import com.sugaronrest.restapicalls.responses.DeleteEntryResponse;
+import com.sugaronrest.restapicalls.responses.InsertEntriesResponse;
+import com.sugaronrest.restapicalls.responses.InsertEntryResponse;
+import com.sugaronrest.restapicalls.responses.LoginResponse;
+import com.sugaronrest.restapicalls.responses.ReadAvailableModulesResponse;
+import com.sugaronrest.restapicalls.responses.ReadEntryListResponse;
+import com.sugaronrest.restapicalls.responses.ReadEntryResponse;
+import com.sugaronrest.restapicalls.responses.ReadLinkedEntryListResponse;
+import com.sugaronrest.restapicalls.responses.ReadLinkedEntryResponse;
+import com.sugaronrest.restapicalls.responses.UpdateEntriesResponse;
+import com.sugaronrest.restapicalls.responses.UpdateEntryResponse;
 import com.sugaronrest.utils.JsonObjectMapper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpStatus;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SugarRestClientExt {
 
@@ -372,6 +395,64 @@ public class SugarRestClientExt {
         } catch (Exception exception) {
             sugarRestResponse.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             sugarRestResponse.setError(ErrorResponse.format(exception, StringUtils.EMPTY));
+        } finally {
+            Authentication.logout(request.getUrl(), loginResponse.sessionId);
+        }
+
+        return sugarRestResponse;
+    }
+
+    /**
+     * Update entity.
+     *
+     *  @param request The request object.
+     *  @param moduleInfo The entity model info.
+     *  @return SugarRestResponse object.
+     */
+    public static SugarRestResponse executeUpdateLinked(
+            SugarRestRequest request, ModuleInfo moduleInfo) {
+        SugarRestResponse sugarRestResponse = new SugarRestResponse();
+        LoginResponse loginResponse = new LoginResponse();
+        ObjectMapper mapper = JsonObjectMapper.getMapper();
+
+        try {
+            LoginRequest loginRequest = new LoginRequest(request.getUrl(),
+                    request.getUsername(), request.getPassword());
+            loginResponse = Authentication.login(loginRequest);
+
+            String url = request.getUrl();
+            String sessionId = loginResponse.sessionId;
+            String moduleName = moduleInfo.name;
+            Options options = request.getOptions();
+            Object entity = request.getParameter();
+
+            UpdateEntryResponse response = UpdateLinkedEntry.run(url, sessionId,
+                    moduleName, entity, options.getSelectFields());
+            if (response != null) {
+                sugarRestResponse
+                        .setJsonRawRequest(response.getJsonRawRequest());
+                sugarRestResponse
+                        .setJsonRawResponse(response.getJsonRawResponse());
+                if (response.getStatusCode() == HttpStatus.SC_OK) {
+                    String updatedId = response.id;
+                    sugarRestResponse.setData(updatedId);
+                    String jsonEnitity = mapper.writeValueAsString(updatedId);
+                    sugarRestResponse.setJData(jsonEnitity);
+                    sugarRestResponse.setStatusCode(response.getStatusCode());
+                } else {
+                    sugarRestResponse.setError(response.getError());
+                    sugarRestResponse.setStatusCode(response.getStatusCode());
+                    sugarRestResponse.setJData(StringUtils.EMPTY);
+                    sugarRestResponse.setData(StringUtils.EMPTY);
+                }
+            }
+
+            return sugarRestResponse;
+        } catch (Exception exception) {
+            sugarRestResponse
+                    .setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            sugarRestResponse.setError(
+                    ErrorResponse.format(exception, StringUtils.EMPTY));
         } finally {
             Authentication.logout(request.getUrl(), loginResponse.sessionId);
         }
