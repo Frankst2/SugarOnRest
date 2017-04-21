@@ -157,6 +157,10 @@ public class SugarRestClient {
                 return SugarRestClientExt.executeInsert(request, moduleInfo);
             }
 
+        case CreateLinked: {
+            return SugarRestClientExt.executeInsertLinked(request, moduleInfo);
+        }
+
             case BulkCreate: {
                 return SugarRestClientExt.executeInserts(request, moduleInfo);
             }
@@ -164,10 +168,6 @@ public class SugarRestClient {
             case Update: {
                 return SugarRestClientExt.executeUpdate(request, moduleInfo);
             }
-
-        case LinkedUpdate: {
-            return SugarRestClientExt.executeUpdateLinked(request, moduleInfo);
-        }
 
             case BulkUpdate: {
                 return SugarRestClientExt.executeUpdates(request, moduleInfo);

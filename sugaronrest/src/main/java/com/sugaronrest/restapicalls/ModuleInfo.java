@@ -24,14 +24,15 @@
 
 package com.sugaronrest.restapicalls;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang.StringUtils;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class ModuleInfo {
@@ -145,9 +146,7 @@ public class ModuleInfo {
     private static ModuleInfo readByType(Type type) throws Exception {
         ModuleInfo moduleInfo = new ModuleInfo();
 
-        String className = getClassName(type);
-        ClassLoader classLoader = ModuleInfo.class.getClassLoader();
-        Class moduleClass = Class.forName(PackageName + "." + className, false, classLoader);
+        Class moduleClass = (Class) type;
 
         String moduleName = null;
         String jsonModuleName = null;

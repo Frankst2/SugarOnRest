@@ -24,22 +24,23 @@
 
 package com.sugaronrest.restapicalls.methodcalls;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.sugaronrest.ErrorResponse;
 import com.sugaronrest.restapicalls.responses.UpdateEntryResponse;
 import com.sugaronrest.utils.JsonObjectMapper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpStatus;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 
-public class UpdateLinkedEntry {
+public class InsertLinkedEntry {
 
     /**
      * Updates entry [SugarCRM REST method - set_entry].
@@ -65,7 +66,9 @@ public class UpdateLinkedEntry {
             Map<String, Object> requestData = new LinkedHashMap<String, Object>();
             requestData.put("session", sessionId);
             requestData.put("module_name", moduleName);
-            requestData.put("name_value_list", EntityToNameValueList(entity, selectFields));
+            Map<String, Object> fields = EntityToNameValueList(entity, selectFields);
+            fields.remove("id");
+            requestData.put("name_value_list", fields);
 
             String jsonRequestData = mapper.writeValueAsString(requestData);
 

@@ -24,8 +24,13 @@
 
 package com.sugaronrest.restapicalls;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
@@ -46,9 +51,10 @@ import com.sugaronrest.restapicalls.methodcalls.GetLinkedEntryList;
 import com.sugaronrest.restapicalls.methodcalls.GetPagedEntryList;
 import com.sugaronrest.restapicalls.methodcalls.InsertEntries;
 import com.sugaronrest.restapicalls.methodcalls.InsertEntry;
+import com.sugaronrest.restapicalls.methodcalls.InsertRelationship;
 import com.sugaronrest.restapicalls.methodcalls.UpdateEntries;
 import com.sugaronrest.restapicalls.methodcalls.UpdateEntry;
-import com.sugaronrest.restapicalls.methodcalls.UpdateLinkedEntry;
+import com.sugaronrest.restapicalls.methodcalls.InsertLinkedEntry;
 import com.sugaronrest.restapicalls.requests.LoginRequest;
 import com.sugaronrest.restapicalls.responses.DeleteEntryResponse;
 import com.sugaronrest.restapicalls.responses.InsertEntriesResponse;
@@ -409,7 +415,7 @@ public class SugarRestClientExt {
      *  @param moduleInfo The entity model info.
      *  @return SugarRestResponse object.
      */
-    public static SugarRestResponse executeUpdateLinked(
+    public static SugarRestResponse executeInsertLinked(
             SugarRestRequest request, ModuleInfo moduleInfo) {
         SugarRestResponse sugarRestResponse = new SugarRestResponse();
         LoginResponse loginResponse = new LoginResponse();
@@ -426,7 +432,10 @@ public class SugarRestClientExt {
             Options options = request.getOptions();
             Object entity = request.getParameter();
 
-            UpdateEntryResponse response = UpdateLinkedEntry.run(url, sessionId,
+            Set<Object> linkedClasses = request.getOptions().getLinkedModules()
+                    .keySet();
+
+            UpdateEntryResponse response = InsertLinkedEntry.run(url, sessionId,
                     moduleName, entity, options.getSelectFields());
             if (response != null) {
                 sugarRestResponse
@@ -439,12 +448,58 @@ public class SugarRestClientExt {
                     String jsonEnitity = mapper.writeValueAsString(updatedId);
                     sugarRestResponse.setJData(jsonEnitity);
                     sugarRestResponse.setStatusCode(response.getStatusCode());
+
+                    // Now update the linked modules and after that update
+                    // relations
+                    for (Object linkedClass : linkedClasses) {
+                        if (linkedClass instanceof Type) {
+                            ModuleInfo mInfo = ModuleInfo
+                                    .create((Type) linkedClass, null);
+                            for (ModuleProperty property : moduleInfo.modelProperties) {
+                                if (mInfo.jsonName.equals(property.jsonName)) {
+                                    if (Collection.class.isAssignableFrom(property.type)) {
+                                        Field field = entity
+                                                .getClass()
+                                                .getDeclaredField(
+                                                        property.name);
+                                        // For accessing private fields
+                                        field.setAccessible(true);
+                                        Collection c = (Collection) field
+                                                .get(entity);
+                                        
+                                        for (Object o : c) {
+                                            UpdateEntryResponse response1 = InsertLinkedEntry
+                                                    .run(url, sessionId,
+                                                            mInfo.name,
+                                                            o,
+                                                            options.getSelectFields());
+
+                                            if (response1
+                                                    .getStatusCode() == HttpStatus.SC_OK) {
+                                                InsertRelationship.run(url,
+                                                        sessionId, moduleName,
+                                                        updatedId,
+                                                        mInfo.jsonName,
+                                                        Arrays.asList(
+                                                                response1.id),
+                                                        options.getSelectFields(),
+                                                        null);
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 } else {
                     sugarRestResponse.setError(response.getError());
                     sugarRestResponse.setStatusCode(response.getStatusCode());
                     sugarRestResponse.setJData(StringUtils.EMPTY);
                     sugarRestResponse.setData(StringUtils.EMPTY);
                 }
+
             }
 
             return sugarRestResponse;

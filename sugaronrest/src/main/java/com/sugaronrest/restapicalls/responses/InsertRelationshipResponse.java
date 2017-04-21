@@ -22,69 +22,18 @@
  SOFTWARE.
  */
 
-package com.sugaronrest;
+package com.sugaronrest.restapicalls.responses;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-public enum RequestType
-{
-    /**
-     * SugarCRM get by id method call
-     */
-    ReadById,
-
-    /**
-     * SugarCRM get all method call.
-     */
-    BulkRead,
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class InsertRelationshipResponse extends BaseResponse {
 
     /**
-     * SugarCRM get paged method call.
+     * Gets or sets the entity identifier of inserted entity
      */
-    PagedRead,
-
-    /**
-     * SugarCRM create method call.
-     */
-    Create,
-
-    /**
-     * SugarCRM bulk create method call.
-     */
-    BulkCreate,
-
-    /**
-     * SugarCRM update method call.
-     */
-    Update,
-
-    /**
-     * SugarCRM create method call, creates linked object as well (similar to LinkedRead)
-     */
-    CreateLinked,
-
-    /**
-     * SugarCRM bulk update method call.
-     */
-    BulkUpdate,
-
-    /**
-     * SugarCRM delete method call.
-     */
-    Delete,
-
-    /**
-     * SugarCRM get by id method call - this gets associated linked objects serialized into a known custom type.
-     */
-    LinkedReadById,
-
-    /**
-     * SugarCRM get all method call - this gets associated linked objects serialized into a known custom type.
-     */
-    LinkedBulkRead,
-
-    /**
-     * SugarCRM get all available modules.
-     */
-    AllModulesRead,
+    @JsonProperty("id")
+    public String id;
 }
-
