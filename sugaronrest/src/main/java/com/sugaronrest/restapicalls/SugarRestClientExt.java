@@ -29,7 +29,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -51,10 +53,10 @@ import com.sugaronrest.restapicalls.methodcalls.GetLinkedEntryList;
 import com.sugaronrest.restapicalls.methodcalls.GetPagedEntryList;
 import com.sugaronrest.restapicalls.methodcalls.InsertEntries;
 import com.sugaronrest.restapicalls.methodcalls.InsertEntry;
+import com.sugaronrest.restapicalls.methodcalls.InsertLinkedEntry;
 import com.sugaronrest.restapicalls.methodcalls.InsertRelationship;
 import com.sugaronrest.restapicalls.methodcalls.UpdateEntries;
 import com.sugaronrest.restapicalls.methodcalls.UpdateEntry;
-import com.sugaronrest.restapicalls.methodcalls.InsertLinkedEntry;
 import com.sugaronrest.restapicalls.requests.LoginRequest;
 import com.sugaronrest.restapicalls.responses.DeleteEntryResponse;
 import com.sugaronrest.restapicalls.responses.InsertEntriesResponse;
@@ -409,7 +411,7 @@ public class SugarRestClientExt {
     }
 
     /**
-     * Update entity.
+     * Insert entity.
      *
      *  @param request The request object.
      *  @param moduleInfo The entity model info.
@@ -432,8 +434,7 @@ public class SugarRestClientExt {
             Options options = request.getOptions();
             Object entity = request.getParameter();
 
-            Set<Object> linkedClasses = request.getOptions().getLinkedModules()
-                    .keySet();
+
 
             UpdateEntryResponse response = InsertLinkedEntry.run(url, sessionId,
                     moduleName, entity, options.getSelectFields());
@@ -451,7 +452,11 @@ public class SugarRestClientExt {
 
                     // Now update the linked modules and after that update
                     // relations
-                    for (Object linkedClass : linkedClasses) {
+                    Map<Object, List<String>> linkedModules = request
+                            .getOptions().getLinkedModules();
+
+                    // TODO: Improve this code, lots of nested blocks
+                    for (Object linkedClass : safeSet(linkedModules.keySet())) {
                         if (linkedClass instanceof Type) {
                             ModuleInfo mInfo = ModuleInfo
                                     .create((Type) linkedClass, null);
@@ -774,4 +779,9 @@ public class SugarRestClientExt {
         }
         return sugarRestResponse;
     }
+
+    public static <T> Set<T> safeSet(Set<T> other) {
+        return other == null ? Collections.EMPTY_SET : other;
+    }
+
 }
