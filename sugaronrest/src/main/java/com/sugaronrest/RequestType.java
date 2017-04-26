@@ -63,6 +63,11 @@ public enum RequestType
     CreateLinked,
 
     /**
+     * SugarCRM create method call, creates linked object as well (similar to LinkedRead)
+     */
+    CreateRelationship,
+
+    /**
      * SugarCRM bulk update method call.
      */
     BulkUpdate,

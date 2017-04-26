@@ -161,6 +161,11 @@ public class SugarRestClient {
             return SugarRestClientExt.executeInsertLinked(request, moduleInfo);
         }
 
+        case CreateRelationship: {
+            return SugarRestClientExt.executeInsertRelationship(request,
+                    moduleInfo);
+        }
+
             case BulkCreate: {
                 return SugarRestClientExt.executeInserts(request, moduleInfo);
             }

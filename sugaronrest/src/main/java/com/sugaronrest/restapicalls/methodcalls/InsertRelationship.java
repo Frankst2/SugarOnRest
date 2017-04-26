@@ -43,18 +43,20 @@ import com.sugaronrest.utils.JsonObjectMapper;
 public class InsertRelationship {
 
     /**
-     * Insert entry [SugarCRM REST method - set_entry].
-     *
-     *  @param url REST API Url.
-     *  @param sessionId Session identifier.
-     *  @param moduleName SugarCRM module name.
-     *  @param entity The entity object to create.
-     *  @param selectFields Selected field list.
-     *  @return InsertEntryResponse object.
+     * Insert relationship [SugarCRM REST method - set_relationship].
+     *  
+     * @param url
+     * @param sessionId
+     * @param moduleName
+     * @param moduleId
+     * @param linkFieldName
+     * @param relatedIds
+     * @param selectFields
+     * @return
      */
     public static InsertRelationshipResponse run(String url, String sessionId,
             String moduleName, String moduleId, String linkFieldName,
-            List<String> relatedIds, List<String> selectFields, Object entity) {
+            List<String> relatedIds, List<String> selectFields) {
 
         InsertRelationshipResponse insertRelationship = null;
         ErrorResponse errorResponse = null;

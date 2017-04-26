@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sugaronrest.ErrorResponse;
 import com.sugaronrest.Options;
+import com.sugaronrest.OptionsRelationship;
 import com.sugaronrest.SugarRestRequest;
 import com.sugaronrest.SugarRestResponse;
 import com.sugaronrest.restapicalls.methodcalls.Authentication;
@@ -61,6 +62,7 @@ import com.sugaronrest.restapicalls.requests.LoginRequest;
 import com.sugaronrest.restapicalls.responses.DeleteEntryResponse;
 import com.sugaronrest.restapicalls.responses.InsertEntriesResponse;
 import com.sugaronrest.restapicalls.responses.InsertEntryResponse;
+import com.sugaronrest.restapicalls.responses.InsertRelationshipResponse;
 import com.sugaronrest.restapicalls.responses.LoginResponse;
 import com.sugaronrest.restapicalls.responses.ReadAvailableModulesResponse;
 import com.sugaronrest.restapicalls.responses.ReadEntryListResponse;
@@ -479,6 +481,15 @@ public class SugarRestClientExt {
                                                             o,
                                                             options.getSelectFields());
 
+                                            // InsertRelationshipResponse
+                                            // com.sugaronrest.restapicalls.methodcalls.InsertRelationship.run(String
+                                            // url, String sessionId, String
+                                            // moduleName, String moduleId,
+                                            // String linkFieldName,
+                                            // List<String>
+                                            // relatedIds, List<String>
+                                            // selectFields, Object entity)
+
                                             if (response1
                                                     .getStatusCode() == HttpStatus.SC_OK) {
                                                 InsertRelationship.run(url,
@@ -487,8 +498,7 @@ public class SugarRestClientExt {
                                                         mInfo.jsonName,
                                                         Arrays.asList(
                                                                 response1.id),
-                                                        options.getSelectFields(),
-                                                        null);
+                                                        options.getSelectFields());
                                             }
                                         }
 
@@ -498,6 +508,68 @@ public class SugarRestClientExt {
                         }
                     }
 
+                } else {
+                    sugarRestResponse.setError(response.getError());
+                    sugarRestResponse.setStatusCode(response.getStatusCode());
+                    sugarRestResponse.setJData(StringUtils.EMPTY);
+                    sugarRestResponse.setData(StringUtils.EMPTY);
+                }
+
+            }
+
+            return sugarRestResponse;
+        } catch (Exception exception) {
+            sugarRestResponse
+                    .setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            sugarRestResponse.setError(
+                    ErrorResponse.format(exception, StringUtils.EMPTY));
+        } finally {
+            Authentication.logout(request.getUrl(), loginResponse.sessionId);
+        }
+
+        return sugarRestResponse;
+    }
+
+    /**
+     * Insert entity.
+     *
+     *  @param request The request object.
+     *  @param moduleInfo The entity model info.
+     *  @return SugarRestResponse object.
+     */
+    public static SugarRestResponse executeInsertRelationship(
+            SugarRestRequest request, ModuleInfo moduleInfo) {
+        SugarRestResponse sugarRestResponse = new SugarRestResponse();
+        LoginResponse loginResponse = new LoginResponse();
+        ObjectMapper mapper = JsonObjectMapper.getMapper();
+
+        try {
+            LoginRequest loginRequest = new LoginRequest(request.getUrl(),
+                    request.getUsername(), request.getPassword());
+            loginResponse = Authentication.login(loginRequest);
+
+            String url = request.getUrl();
+            String sessionId = loginResponse.sessionId;
+            String moduleName = moduleInfo.name;
+
+            OptionsRelationship options = (OptionsRelationship) request.getOptions();
+            String moduleId = request.getParameter().toString();
+
+            InsertRelationshipResponse response = InsertRelationship.run(url,
+                    sessionId,
+                    moduleName, moduleId, null, options.getSelectFields(),
+                    options.getRelatedIds());
+            if (response != null) {
+                sugarRestResponse
+                        .setJsonRawRequest(response.getJsonRawRequest());
+                sugarRestResponse
+                        .setJsonRawResponse(response.getJsonRawResponse());
+                if (response.getStatusCode() == HttpStatus.SC_OK) {
+                    String insertedId = response.id;
+                    sugarRestResponse.setData(insertedId);
+                    String jsonEnitity = mapper.writeValueAsString(insertedId);
+                    sugarRestResponse.setJData(jsonEnitity);
+                    sugarRestResponse.setStatusCode(response.getStatusCode());
                 } else {
                     sugarRestResponse.setError(response.getError());
                     sugarRestResponse.setStatusCode(response.getStatusCode());
