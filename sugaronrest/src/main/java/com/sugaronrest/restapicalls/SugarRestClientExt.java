@@ -488,7 +488,7 @@ public class SugarRestClientExt {
                                             // String linkFieldName,
                                             // List<String>
                                             // relatedIds, List<String>
-                                            // selectFields, Object entity)
+                                            // selectFields)
 
                                             if (response1
                                                     .getStatusCode() == HttpStatus.SC_OK) {
@@ -557,8 +557,8 @@ public class SugarRestClientExt {
 
             InsertRelationshipResponse response = InsertRelationship.run(url,
                     sessionId,
-                    moduleName, moduleId, null, options.getSelectFields(),
-                    options.getRelatedIds());
+                    moduleName, moduleId, options.getLinkFieldName(),
+                    options.getRelatedIds(), options.getSelectFields());
             if (response != null) {
                 sugarRestResponse
                         .setJsonRawRequest(response.getJsonRawRequest());

@@ -4,6 +4,7 @@ import java.util.List;
 
 public class OptionsRelationship extends Options {
     private List<String> relatedIds;
+    private String linkFieldName;
 
     /**
      * @return the relatedIds
@@ -17,6 +18,20 @@ public class OptionsRelationship extends Options {
      */
     public final void setRelatedIds(List<String> relatedIds) {
         this.relatedIds = relatedIds;
+    }
+
+    /**
+     * @return the linkFieldName
+     */
+    public final String getLinkFieldName() {
+        return linkFieldName;
+    }
+
+    /**
+     * @param linkFieldName the linkFieldName to set
+     */
+    public final void setLinkFieldName(String linkFieldName) {
+        this.linkFieldName = linkFieldName;
     }
 
 }
