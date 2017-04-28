@@ -146,7 +146,7 @@ public class ModuleInfo {
     private static ModuleInfo readByType(Type type) throws Exception {
         ModuleInfo moduleInfo = new ModuleInfo();
 
-        Class moduleClass = (Class) type;
+        Class<?> moduleClass = (Class<?>) type;
 
         String moduleName = null;
         String jsonModuleName = null;
@@ -240,26 +240,6 @@ public class ModuleInfo {
         }
 
         return modelProperties;
-    }
-
-    /**
-     * Gets class name.
-     *
-     * @param moduleName Module name.
-     * @return Class name.
-     */
-    private static String getClassName(String moduleName) {
-        if (!StringUtils.isNotBlank(moduleName)) {
-            return StringUtils.EMPTY;
-        }
-
-        moduleName = moduleName.trim();
-        String[] splitArray = moduleName.split("\\.");
-        if (splitArray.length > 0) {
-            return splitArray[splitArray.length - 1];
-        }
-
-        return moduleName;
     }
 
     /**
