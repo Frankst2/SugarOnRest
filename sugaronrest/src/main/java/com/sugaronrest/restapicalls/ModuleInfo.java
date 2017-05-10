@@ -28,6 +28,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -222,9 +223,9 @@ public class ModuleInfo {
      */
     private static List<ModuleProperty> getFieldAnnotations(Class type) {
         List<ModuleProperty> modelProperties = new ArrayList<ModuleProperty>();
-        Field[] fields = type.getDeclaredFields();
+        Iterable<Field> fields = getFieldsUpTo(type, Object.class);
          for(Field field : fields) {
-            Annotation[] annotations = field.getDeclaredAnnotations();
+            Annotation[] annotations = field.getAnnotations();
 
             for(Annotation annotation : annotations){
                 if(annotation instanceof JsonProperty){
@@ -260,6 +261,23 @@ public class ModuleInfo {
         }
 
         return  type.getSuperclass().equals(Number.class);
+    }
+
+    public static Iterable<Field> getFieldsUpTo(Class<?> type,
+            Class<?> exclusiveParent) {
+        List<Field> currentClassFields = new ArrayList<>();
+        currentClassFields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+        Class<?> parentClass = type.getSuperclass();
+        if (parentClass != null && (exclusiveParent == null
+                || !parentClass.equals(exclusiveParent))) {
+            List<Field> parentClassFields = (List<Field>) getFieldsUpTo(
+                    parentClass,
+                    exclusiveParent);
+            currentClassFields.addAll(parentClassFields);
+        }
+
+        return currentClassFields;
     }
 }
 

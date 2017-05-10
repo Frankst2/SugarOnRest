@@ -502,6 +502,7 @@ public class SugarRestClientExt {
                                             }
                                         }
 
+                                        break;
                                     }
                                 }
                             }
