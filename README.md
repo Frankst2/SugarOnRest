@@ -7,6 +7,36 @@ This is a port of .NET C# [SugarRestSharp](https://github.com/mattkol/SugarRestS
 
 For more info/documentation, please check [SugarOnRest wiki](https://github.com/mattkol/SugarOnRest/wiki)
 
+### Fork/branch documentation
+This fork/branch is used for various bugfixes with the intention of pushing the branches back to the original version at (https://github.com/mattkol/SugarOnRest).
+
+The **createlinkedentries** branch is currently used to implement a feature which can create so-called linked entries as well. This is a method, which is not provided by SugarCRM/SuiteCRM API and is instead implemented in this library. With this method you can easily create entries in SuiteCRM which relations to other modules within SuiteCRM.
+The method is called **InsertLinkedEntry** in the Java code and works similar to the **GetLinkedEntry** one, except it's used for creating an entry.
+Usage: In general the usage is very similar to the usage of **InsertEntry**. However, you need to specify to which other modules in SuiteCRM your entry has a relationship to. So for example, to create an entry in the Contacts module with various relationships to other modules you need to use the following code (short version, assuming SugarRestClient is already setup):
+```java
+Contact contact = getContact();
+
+
+SugarRestRequest request = new SugarRestRequest(RequestType.CreateLinked);
+Map<Object, List<String>> linkedListInfo = new HashMap<Object, List<String>>();
+
+List<String> selectEmailFields = new ArrayList<String>();
+
+linkedListInfo.put(EmailAddresses.class, selectEmailFields);
+linkedListInfo.put(ContactsCharacteristic.class, null);
+linkedListInfo.put(ContactsCustomerCreditProfile.class, null);
+        
+request.getOptions().setLinkedModules(linkedListInfo);
+
+request.setModuleType(Contact.class);
+request.setParameter(contact);
+
+SugarRestResponse response = client.execute(request);
+
+```
+
+With the second parameter of an entry in the Map you can control what variables from the Java object should be set in SuiteCRM. When the parameter is null, it will set all the variables from the Java object.
+
 ### Basic Sample Usages
 ```java
 String sugarCrmUrl = "http://demo.suiteondemand.com/service/v4_1/rest.php";
