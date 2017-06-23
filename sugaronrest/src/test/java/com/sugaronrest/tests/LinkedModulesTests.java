@@ -1,27 +1,30 @@
 package com.sugaronrest.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
+import org.junit.Test;
+
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sugaronrest.*;
+import com.sugaronrest.SugarRestClient;
+import com.sugaronrest.SugarRestResponse;
 import com.sugaronrest.modules.Accounts;
-import com.sugaronrest.modules.Contacts;
 import com.sugaronrest.tests.custommodels.CustomAcccount1;
 import com.sugaronrest.tests.custommodels.CustomAcccount2;
 import com.sugaronrest.tests.custommodels.CustomAcccount3;
 import com.sugaronrest.tests.helpers.AccountsModule;
 import com.sugaronrest.tests.helpers.LinkedModules;
 import com.sugaronrest.utils.JsonObjectMapper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpStatus;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 
 public class LinkedModulesTests {
@@ -118,6 +121,32 @@ public class LinkedModulesTests {
 
 
         // -------------------End Read Account Link Concat-------------------
+    }
+
+    @Test
+    public void linkedWriteTest() throws IOException {
+        SugarRestClient client = new SugarRestClient(TestAccount.Url,
+                TestAccount.Username, TestAccount.Password);
+
+        // -------------------Write Account Link Contact-------------------
+        int count = 10;
+        SugarRestResponse response = LinkedModules
+                .writeAccountLinkContact(client, count);
+
+        assertNotNull(response);
+        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
+
+        String jsonData = response.getJData();
+        assertNull(response.getData());
+        assertNotNull(jsonData);
+
+        // Deserialize json data to custom object
+        ObjectMapper mapper = JsonObjectMapper.getMapper();
+        JavaType type = mapper.getTypeFactory().constructCollectionType(
+                ArrayList.class, CustomAcccount1.class);
+        List<CustomAcccount1> customAccounts = mapper.readValue(jsonData, type);
+        assertNotNull(customAccounts);
+        assertEquals(customAccounts.size(), count);
     }
 
     @Test

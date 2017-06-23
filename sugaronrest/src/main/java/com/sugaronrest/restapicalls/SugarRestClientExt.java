@@ -481,15 +481,6 @@ public class SugarRestClientExt {
                                                             o,
                                                             options.getSelectFields());
 
-                                            // InsertRelationshipResponse
-                                            // com.sugaronrest.restapicalls.methodcalls.InsertRelationship.run(String
-                                            // url, String sessionId, String
-                                            // moduleName, String moduleId,
-                                            // String linkFieldName,
-                                            // List<String>
-                                            // relatedIds, List<String>
-                                            // selectFields)
-
                                             if (response1
                                                     .getStatusCode() == HttpStatus.SC_OK) {
                                                 InsertRelationship.run(url,
